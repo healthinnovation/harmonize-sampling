@@ -9,6 +9,8 @@ output: html_document
 library(readr)
 library(dplyr)
 library(scales)
+library(tidyr)
+library(purrr)
 ```
 
 ```{r}
@@ -17,6 +19,52 @@ db_raw <- read_csv("data/db_variables.csv")
 
 ```{r}
 db <- db_raw %>% 
-  dplyr::mutate(across(night_light:tmmn, ~ rescale(.x)))
+  mutate(
+    distance = cut(
+      distance_m, quantile(db_raw$distance_m, c(0, 0.25, 0.5, 0.75, 1)),
+      labels = c("Proximate", "Moderate", "Distant", "Extra distant"),
+      include.lowest = TRUE
+    )
+  ) %>% 
+  group_by(distance) %>% 
+  dplyr::mutate(across(etp:tmmn, ~ rescale(.x))) %>% 
+  ungroup()
 ```
+
+```{r}
+clustering <- db %>% 
+  select(-c(village, lat, lon, distance_m)) %>% 
+  nest(data = -distance) %>% 
+  mutate(matrix = map(data, ~ select(.x, etp:tmmn))) %>% 
+  mutate(distance_matrix = map(matrix, ~ dist(.x, method = "euclidean"))) %>% 
+  mutate(hclust = map(distance_matrix, ~ hclust(.x, method = "complete")))
+```
+
+```{r}
+plot(clustering$hclust[[1]])
+```
+
+```{r}
+plot(clustering$hclust[[2]])
+```
+
+
+```{r}
+plot(clustering$hclust[[3]])
+```
+
+```{r}
+plot(clustering$hclust[[4]])
+```
+
+```{r}
+clustering_groups <- clustering %>% 
+  mutate(group = map(hclust, ~ cutree(.x, 2))) %>% 
+  select(-c(matrix, distance_matrix, hclust)) %>% 
+  unnest(c(data, group))
+```
+
+
+
+
 
