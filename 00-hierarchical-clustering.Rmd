@@ -11,6 +11,7 @@ library(dplyr)
 library(scales)
 library(tidyr)
 library(purrr)
+library(cluster)
 ```
 
 ```{r}
@@ -22,7 +23,7 @@ db <- db_raw %>%
   mutate(
     distance = cut(
       distance_m, quantile(db_raw$distance_m, c(0, 0.25, 0.5, 0.75, 1)),
-      labels = c("Proximate", "Moderate", "Distant", "Extra distant"),
+      labels = c("Very proximate", "Proximate", "Distant", "Very distant"),
       include.lowest = TRUE
     )
   ) %>% 
@@ -32,38 +33,91 @@ db <- db_raw %>%
 ```
 
 ```{r}
-clustering <- db %>% 
+get_coeff <- function(matrix, methods) {
+  names(methods) <- methods
+  coeff <- map_df(methods, ~ agnes(matrix, method = .x)$ac)
+  coeff
+}
+```
+
+```{r}
+methods <- c("average", "single", "complete", "ward", "weighted")
+```
+
+```{r}
+distance_matrices <- db %>% 
   select(-c(village, lat, lon, distance_m)) %>% 
   nest(data = -distance) %>% 
   mutate(matrix = map(data, ~ select(.x, etp:tmmn))) %>% 
-  mutate(distance_matrix = map(matrix, ~ dist(.x, method = "euclidean"))) %>% 
-  mutate(hclust = map(distance_matrix, ~ hclust(.x, method = "complete")))
+  mutate(distance_matrix = map(matrix, ~ dist(.x, method = "euclidean")))
 ```
 
 ```{r}
-plot(clustering$hclust[[1]])
+best_method <- distance_matrices %>% 
+  mutate(coeff = map(distance_matrix, ~ get_coeff(.x, methods))) %>% 
+  select(distance, coeff) %>% 
+  unnest(coeff)
+
+best_method
 ```
 
 ```{r}
-plot(clustering$hclust[[2]])
+clustering <- distance_matrices %>%
+  mutate(clust = map(distance_matrix, ~ agnes(.x, method = "ward")))
 ```
 
-
-```{r}
-plot(clustering$hclust[[3]])
+```{r fig.height=8, fig.width=10}
+par(list(mfrow = c(2, 2)))
+pltree(clustering$clust[[1]])
+pltree(clustering$clust[[2]])
+pltree(clustering$clust[[3]])
+pltree(clustering$clust[[4]])
 ```
 
 ```{r}
-plot(clustering$hclust[[4]])
+n_groups <- c(3, 3, 2, 2)
 ```
 
 ```{r}
 clustering_groups <- clustering %>% 
-  mutate(group = map(hclust, ~ cutree(.x, 2))) %>% 
-  select(-c(matrix, distance_matrix, hclust)) %>% 
-  unnest(c(data, group))
+  mutate(group = map2(clust, n_groups, ~ cutree(tree = .x, k = .y))) 
 ```
 
+```{r}
+clustering_groups %>% 
+  select(distance, data, group) %>% 
+  unnest(data, group) %>% 
+  group_by(distance, group) %>% 
+  summarise(cases = n())
+```
+
+```{r}
+sampling <- clustering_groups %>% 
+  mutate(
+    grouped_data = map2(data, group, ~ mutate(.x, group = .y))
+  ) %>% 
+  mutate(
+    samples = map(
+      grouped_data,
+      ~ .x %>% 
+        group_by(group) %>% 
+        slice_sample(prop = 0.4) %>% 
+        ungroup()
+    )
+  )
+```
+
+```{r}
+samples <- sampling %>% 
+  select(distance, samples) %>% 
+  unnest(samples)
+
+samples
+```
+
+```{r}
+write_csv(samples, "data/village-clust-samples.csv")
+```
 
 
 
