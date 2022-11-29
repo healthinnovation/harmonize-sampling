@@ -31,5 +31,10 @@ Humidity | kg kg-1 | 11132 meters | 2021 |NASA GES DISC at NASA Goddard Space Fl
 Evapontraspiration | kg/m^2 |500 meters| 2021 | NASA LP DAAC at the USGS EROS Center
 Global Human Modification | km^2 | 1000 meters | 2016 | Conservation Science Partners 
 Population | - | 100 meters | 2021 | WorldPop
+Deforestation | km2 | 30 meters | 2001-2021| Hansen Global Forest Change v1.9 (2000-2021)
+Square meters of total built-up surface | m2 | 100 meters | 1975 - 2030 | GHSL - Global Human Settlement Layer
+
+
+
 
 
