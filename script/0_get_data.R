@@ -285,6 +285,34 @@ write_sf(cp_sf,"cp_buffer.gpkg")
 ghs_total <- st_read("../raw_data/GHS.gpkg") %>% 
   st_set_geometry(NULL)
 
+
+#  Night Lights -----------------------------------------------------------
+
+ln_2014 <- get_viirs(
+  from = "2014-01-01",
+  to = "2014-12-31",
+  fun = "mean",
+  region = cp_ee
+) %>% 
+  rename(ln_2014 = ntl2014)
+
+ln_2021 <- get_viirs(
+  from = "2021-01-01",
+  to = "2021-12-31",
+  fun = "mean",
+  region = cp_ee
+  ) %>% 
+  rename(ln_2021 = ntl2021)
+
+ln_total <- ln_2021 %>% 
+  left_join(ln_2014,by = "codigo") %>% 
+  mutate(
+    delta_ln = (ln_2021 - ln_2014)*100/ln_2014
+  )
+
+rm(ln_2021)
+rm(ln_2010)
+
 # Modeling spatial data ---------------------------------------------------
 m1 <- left_join(
   cp,
@@ -344,16 +372,21 @@ m10 <- left_join(
   m9,
   ghs_total,
   "codigo"
-) %>% 
-  select(-c())
+)
+
+m11 <- left_join(
+  m10,
+  ln_total %>% select(-c(village.x,village.y)),
+  "codigo"
+)
 
 write_csv(
-  m10 %>% 
+  m11 %>% 
     mutate(
       lat = st_coordinates(geom)[,2],
       lon = st_coordinates(geom)[,1])%>% 
     st_set_geometry(NULL)
-  ,"../processed_data/db_variables_v2.csv"
+  ,"../processed_data/db_variables.csv"
   )
 
-write_sf(m10,"../processed_data/db_variables_v2.gpkg")
+write_sf(m10,"../processed_data/db_variables.gpkg")

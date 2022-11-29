@@ -1,8 +1,10 @@
 library(tidyverse)
 library(factoextra)
 library(cptcity)
+library(ggview)
+
 # Reading spatial data ----------------------------------------------------
-data <- read_csv("../processed_data/db_variables_v2.csv") %>% 
+data <- read_csv("../processed_data/db_variables.csv") %>% 
   select(-lat,-lon,-village) %>% 
   as.data.frame()
 rownames(data) <- data$codigo
@@ -13,7 +15,7 @@ datafinal <- data %>% select(-codigo) %>%
 PCA <- prcomp(datafinal,center = FALSE,scale. = FALSE)
 summary(PCA)
 
-fviz_pca_var(
+p1 <- fviz_pca_var(
   PCA,
   col.var = "contrib", # Color by contributions to the PC
   gradient.cols = cpt(pal = "mpl_viridis",rev = 1),
@@ -21,7 +23,7 @@ fviz_pca_var(
 )
 
 ggsave(
-  filename = "../graphics/pca_plot_v2.png",
+  filename = "../graphics/pca_plot.png",
   plot = last_plot(),
   width = 8,
   height = 8,bg = "white")
@@ -32,7 +34,7 @@ dbPCA  <- PCA$x[,1:3] %>%
     codigo = data$codigo,
     index = PC1 + PC2 + PC3
     )
-original_data <- read_csv("../processed_data/db_variables_v2.csv")
+original_data <- read_csv("../processed_data/db_variables.csv")
 final_data <- left_join(
   original_data,
   dbPCA,
@@ -48,7 +50,7 @@ final_data <- left_join(
     )
     )
 # Save original data 
-write_csv(final_data,"../processed_data/db_variables_with_PCA_v2.csv")
+write_csv(final_data,"../processed_data/db_variables_with_PCA.csv")
 # Random selection 
 set.seed(2022)
 moderate <- sample_n(final_data %>% filter(class == "bajo"),5)
@@ -58,4 +60,4 @@ extradistant <- sample_n(final_data %>% filter(class == "muy alto"),5)
 
 # Final dataset of villages
 villages_sample <- bind_rows(moderate,proximate,distant,extradistant)
-write_csv(villages_sample,"../processed_data/villages_selected_sample_v2.csv")
+write_csv(villages_sample,"../processed_data/villages_selected_sample.csv")
