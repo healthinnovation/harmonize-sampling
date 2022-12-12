@@ -1,0 +1,479 @@
+---
+title: "Village sampling"
+author: "Diego"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(purrr)
+library(cluster)
+library(pheatmap)
+library(factoextra)
+library(sf)
+library(FactoMineR)
+library(yardstick)
+```
+
+```{r}
+dataset <- readr::read_csv("data/processed/dataset.csv", col_types = "ccd")
+glimpse(dataset)
+```
+
+# Exploratory data analysis
+
+```{r}
+variables <- select(dataset, malaria:malaria_diff)
+```
+
+```{r fig.height=10, fig.width=10}
+variables %>% 
+  tidyr::pivot_longer(cols = everything(), names_to = "variable") %>% 
+  ggplot(aes(value, variable)) +
+  geom_violin() +
+  geom_boxplot(width = 0.1) +
+  facet_wrap(~variable, ncol = 2, scales = "free")
+```
+
+```{r}
+variables_norm <- mutate(variables, across(everything(), scales::rescale))
+variables_std <- mutate(variables, across(everything(), ~as.numeric(scale(.x))))
+```
+
+# Stratification
+
+## Hierarchical clustering
+
+```{r}
+dist_euclidean_norm <- get_dist(variables_norm, method = "euclidean")
+dist_pearson_norm <- get_dist(variables_norm, method = "pearson")
+dist_spearman_norm <- get_dist(variables_norm, method = "spearman")
+dist_euclidean_std <- get_dist(variables_std, method = "euclidean")
+dist_pearson_std <- get_dist(variables_std, method = "pearson")
+dist_spearman_std <- get_dist(variables_std, method = "spearman")
+```
+
+### Heatmaps
+
+```{r}
+pheatmap(dist_euclidean_norm)
+```
+
+```{r}
+pheatmap(dist_euclidean_std)
+```
+
+
+```{r}
+pheatmap(dist_pearson_norm)
+```
+
+```{r}
+pheatmap(dist_pearson_std)
+```
+
+```{r}
+pheatmap(dist_spearman_norm)
+```
+
+```{r}
+pheatmap(dist_spearman_std)
+```
+
+
+### Selection of distance and linkage method
+
+```{r}
+scale_data <- function(data, method = "standardization") {
+  if (method == "standardization") {
+    data_scaled <- mutate(data, across(everything(), ~as.numeric(scale(.x))))
+  } 
+  if (method == "normalization") {
+    data_scaled <- mutate(data, across(everything(), scales::rescale))
+  }
+  data_scaled
+}
+```
+
+
+```{r}
+scaling_method <- c("standardization", "normalization")
+dist_method <- c("euclidean", "pearson", "spearman")
+linkage_method <- c("average", "single", "complete", "ward", "weighted")
+```
+
+```{r}
+design <- tidyr::expand_grid(scaling_method, dist_method, linkage_method, variables)
+```
+
+```{r}
+agglomerative_coeff <- design %>% 
+  tidyr::nest(data = -c(scaling_method, dist_method, linkage_method)) %>% 
+  mutate(
+    scaling = map2(data, scaling_method, ~scale_data(.x, method = .y)),
+    dist_mat = map2(scaling, dist_method, ~get_dist(.x, method = .y)),
+    tree = map2(dist_mat, linkage_method, ~agnes(.x, method = .y)),
+    ac = map(tree, ~.x$ac)
+  ) %>% 
+  tidyr::unnest(ac) %>% 
+  arrange(-ac)
+```
+
+```{r}
+agglomerative_coeff
+```
+
+```{r warning=FALSE}
+fviz_dend(
+  agglomerative_coeff$tree[[1]], main = "Standardized data - Spearman correlation - Ward linkage"
+)
+```
+
+```{r warning=FALSE}
+fviz_dend(
+  agglomerative_coeff$tree[[2]], main = "Normalized data - Pearson correlation - Ward linkage"
+)
+```
+
+### Selection of number of clusters
+
+```{r}
+set.seed(2022)
+```
+
+```{r}
+fviz_nbclust(
+  variables_std, hcut, hc_func = "agnes", hc_method = "ward.D2", 
+  c_metric = "spearman", method = "silhouette"
+)
+```
+
+```{r}
+fviz_nbclust(
+  variables_std, hcut, hc_func = "agnes", hc_method = "ward.D2", hc_metric = "spearman", 
+  method = "wss"
+)
+```
+
+```{r}
+fviz_nbclust(
+  variables_std, hcut, hc_func = "agnes", hc_method = "ward.D2", 
+  hc_metric = "spearman", method = "gap_stat"
+)
+```
+
+```{r}
+fviz_nbclust(
+  variables_norm, hcut, hc_func = "agnes", hc_method = "ward.D2", 
+  c_metric = "pearson", method = "silhouette"
+)
+```
+
+```{r}
+fviz_nbclust(
+  variables_norm, hcut, hc_func = "agnes", hc_method = "ward.D2", hc_metric = "pearson", 
+  method = "wss"
+)
+```
+
+```{r}
+fviz_nbclust(
+  variables_norm, hcut, hc_func = "agnes", hc_method = "ward.D2", 
+  hc_metric = "pearson", method = "gap_stat"
+)
+```
+
+#### 2 clusters
+
+```{r}
+clustering_2 <- hcut(
+  variables_std, k = 2, hc_func = "agnes", hc_method = "ward.D2", 
+  hc_metric = "spearman"
+)
+```
+
+```{r}
+fviz_cluster(clustering_2, ggtheme = theme_classic()) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed")
+```
+
+```{r}
+fviz_silhouette(clustering_2, ggtheme = theme_classic())
+```
+
+```{r}
+variables_norm %>% 
+  mutate(group = as.factor(clustering_2$cluster)) %>% 
+  group_by(group) %>% 
+  summarise(across(everything(), mean), .groups = "drop") %>% 
+  tidyr::pivot_longer(-group) %>% 
+  ggplot(aes(group, value, color = name, group = name)) +
+  geom_point() +
+  geom_line() +
+  scale_x_discrete(expand = c(0.05, 0.05)) +
+  theme_classic()
+```
+
+#### 3 clusters
+
+```{r}
+clustering_3 <- hcut(
+  variables_std, k = 3, hc_func = "agnes", hc_method = "ward.D2", 
+  hc_metric = "spearman"
+)
+```
+
+```{r}
+fviz_cluster(clustering_3, ggtheme = theme_classic()) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed")
+```
+
+```{r}
+fviz_silhouette(clustering_3, ggtheme = theme_classic())
+```
+
+```{r}
+variables_norm %>% 
+  mutate(group = as.factor(clustering_3$cluster)) %>% 
+  group_by(group) %>% 
+  summarise(across(everything(), mean), .groups = "drop") %>% 
+  tidyr::pivot_longer(-group) %>% 
+  ggplot(aes(group, value, color = name, group = name)) +
+  geom_point() +
+  geom_line() +
+  scale_x_discrete(expand = c(0.05, 0.05)) +
+  theme_classic()
+```
+
+#### 4 clusters
+
+```{r}
+clustering_4 <- hcut(
+  variables_std, k = 4, hc_func = "agnes", hc_method = "ward.D2", 
+  hc_metric = "spearman"
+)
+```
+
+```{r}
+fviz_cluster(clustering_4, ggtheme = theme_classic()) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed")
+```
+
+```{r}
+fviz_silhouette(clustering_4, ggtheme = theme_classic())
+```
+
+```{r}
+variables_norm %>% 
+  mutate(group = as.factor(clustering_4$cluster)) %>% 
+  group_by(group) %>% 
+  summarise(across(everything(), mean), .groups = "drop") %>% 
+  tidyr::pivot_longer(-group) %>% 
+  ggplot(aes(group, value, color = name, group = name)) +
+  geom_point() +
+  scale_x_discrete(expand = c(0.05, 0.05)) +
+  geom_line() +
+  theme_classic()
+```
+
+### Maps
+
+```{r}
+dataset_clustering <- dataset %>% 
+  mutate(
+    hc_group_2 = as.factor(clustering_2$cluster),
+    hc_group_3 = as.factor(clustering_3$cluster),
+    hc_group_4 = as.factor(clustering_4$cluster)
+  )
+```
+
+```{r}
+dataset_clustering %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  ggplot(aes(color = hc_group_2)) +
+  geom_sf() +
+  theme_classic()
+```
+
+```{r}
+dataset_clustering %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  ggplot(aes(color = hc_group_3)) +
+  geom_sf() +
+  theme_classic()
+```
+
+```{r}
+dataset_clustering %>% 
+  st_as_sf(coords = c("lon", "lat")) %>%  
+  ggplot(aes(color = hc_group_4)) +
+  geom_sf() +
+  theme_classic()
+```
+
+# Principal components analysis
+
+```{r}
+pca <- PCA(variables_std, graph = FALSE)
+```
+
+## Scree plot
+
+```{r}
+fviz_screeplot(pca)
+```
+
+### Contribution plot
+
+```{r}
+fviz_contrib(pca, choice = "var", axes = 1, top = 10)
+```
+
+```{r}
+fviz_contrib(pca, choice = "var", axes = 2, top = 10)
+```
+
+### Coordinate plane
+
+```{r}
+fviz_pca_ind(pca)
+```
+
+### Scoring
+
+```{r}
+pca_results <- get_pca_ind(pca)
+scores <- pca_results$coord
+```
+
+```{r}
+dataset_pca <- dataset_clustering %>% 
+  mutate(pca_score = scores[, 1]) %>% 
+  mutate(
+    pca_group_2 = cut(
+      pca_score, breaks = quantile(pca_score, c(0, .5, 1)), 
+      labels = as.character(rev(1:2)),
+      include.lowest = TRUE
+    ),
+    pca_group_3 = cut(
+      pca_score, breaks = quantile(pca_score, c(0, .33, .66, 1)), 
+      labels = as.character(rev(1:3)),
+      include.lowest = TRUE
+    ),
+    pca_group_4 = cut(
+      pca_score, breaks = quantile(pca_score, c(0, .25, .5, .75, 1)), 
+      labels = as.character(rev(1:4)),
+      include.lowest = TRUE
+    )
+  ) %>% 
+  mutate(across(pca_group_2:pca_group_4, forcats::fct_rev))
+```
+
+### Maps
+
+```{r}
+dataset_pca %>% 
+  st_as_sf(coords = c("lon", "lat")) %>%  
+  ggplot(aes(color = pca_group_2)) +
+  geom_sf() +
+  theme_classic()
+```
+
+```{r}
+dataset_pca %>% 
+  st_as_sf(coords = c("lon", "lat")) %>%  
+  ggplot(aes(color = pca_group_3)) +
+  geom_sf() +
+  theme_classic()
+```
+
+```{r}
+dataset_pca %>% 
+  st_as_sf(coords = c("lon", "lat")) %>%  
+  ggplot(aes(color = pca_group_4)) +
+  geom_sf() +
+  theme_classic()
+```
+
+## Comparison
+
+### 2 groups
+
+```{r}
+dataset_pca %>% 
+  conf_mat(hc_group_2, pca_group_2, dnn = c("PCA", "HC"))
+```
+
+```{r}
+dataset_pca %>% 
+  kap(hc_group_2, pca_group_2)
+```
+
+
+### 3 groups
+
+```{r}
+dataset_pca %>% 
+  conf_mat(hc_group_3, pca_group_3, dnn = c("PCA", "HC"))
+```
+
+```{r}
+dataset_pca %>% 
+  kap(hc_group_3, pca_group_3)
+```
+
+
+### 4 groups
+
+```{r}
+dataset_pca %>% 
+  conf_mat(hc_group_4, pca_group_4, dnn = c("PCA", "HC"))
+```
+
+```{r}
+dataset_pca %>% 
+  kap(hc_group_4, pca_group_4)
+```
+
+# Sampling
+
+```{r}
+set.seed(2022)
+
+sampling_20 <- dataset_pca %>% 
+  group_by(hc_group_2) %>% 
+  slice_sample(prop = 20/56) %>% 
+  ungroup()
+
+sampling_10 <- dataset_pca %>% 
+  group_by(hc_group_2) %>% 
+  slice_sample(prop = 10/56) %>% 
+  ungroup()
+```
+
+```{r}
+full_dataset <- dataset_pca %>% 
+  st_as_sf(coords = c("lon", "lat"))
+
+sample_dataset <- sampling %>% 
+  st_as_sf(coords = c("lon", "lat"))
+```
+
+```{r}
+ggplot(full_dataset) +
+  geom_sf(alpha = 0.1) +
+  geom_sf(aes(color = hc_group_4), data = sample_dataset) +
+  theme_classic()
+```
+
+```{r}
+# write_csv(samples, "data/village-clust-samples.csv")
+```
+
+
+
+

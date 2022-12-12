@@ -1,0 +1,94 @@
+---
+title: "Data processing"
+author: "Diego Villa"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+```
+
+```{r}
+climate_variables_path <- "data/db_variables.csv"
+malaria_cases_path <- "data/malaria-cases.csv"
+diseases_cases_path <- "data/diseases-cases-2022.csv"
+```
+
+```{r}
+climate_variables_raw <- readr::read_csv(
+  climate_variables_path, col_types = "ccd", 
+  col_select = -c(starts_with("delta"))
+)
+malaria_cases_raw <- readr::read_csv(
+  malaria_cases_path, col_types = "ccd", 
+  col_select = c(codigo, `2010`, `2019`, POBLACION)
+)
+diseases_cases_raw <- readr::read_csv(
+  diseases_cases_path, col_types = "cccccccccd", 
+  col_select = c(IDCCPP_17, Pv:Lepto)
+)
+```
+
+```{r}
+climate_variables <- climate_variables_raw %>% 
+  janitor::clean_names() %>% 
+  rename(ubigeo = codigo) %>% 
+  rename_with(~sub("([a-z])([0-9])", "\\1_\\2", .x))
+
+malaria_cases <- malaria_cases_raw %>% 
+  janitor::clean_names() %>% 
+  rename(ubigeo = codigo, malaria_2010 = x2010, malaria_2019 = x2019)
+
+diseases_cases <- diseases_cases_raw %>% 
+  janitor::clean_names() %>% 
+  rename(ubigeo = idccpp_17, vivax = pv, falciparum = pf, malaria = total)
+```
+
+```{r}
+datasets <- list(climate_variables, malaria_cases, diseases_cases)
+```
+
+```{r}
+dataset_raw <- purrr::reduce(datasets, inner_join, by = "ubigeo")
+```
+
+```{r}
+dataset <- dataset_raw %>% 
+  mutate(
+    pr_mean = (pr_2010 + pr_2021) / 2,
+    ro_mean = (ro_2010 + ro_2021) / 2,
+    soil_mean = (soil_2010 + soil_2021) / 2,
+    tmmx_mean = (tmmx_2010 + tmmx_2021) / 2,
+    tmmn_mean = (tmmn_2010 + tmmn_2021) / 2,
+    etp_mean = (etp_2010 + etp_2021) / 2,
+    humidity_mean = (humidity_2010 + humidity_2021) / 2,
+    pop_mean = (pop_2010 + pop_2020) / 2,
+    def_mean = (def_2010 + def_2021) / 2,
+    ghs_mean = (ghs_2010_mean + ghs_2020_mean) / 2,
+    ln_mean = (ln_2014 + ln_2021) / 2,
+    malaria_mean = (malaria_2010 + malaria_2019) / 2 * poblacion,
+    pr_diff = pr_2021 - pr_2010,
+    ro_diff = ro_2021 - ro_2010,
+    soil_diff = soil_2021 - soil_2010,
+    tmmx_diff = tmmx_2021 - tmmx_2010,
+    tmmn_diff = tmmn_2021 - tmmn_2010,
+    etp_diff = etp_2021 - etp_2010,
+    humidity_diff = humidity_2021 - humidity_2010,
+    pop_diff = pop_2020 - pop_2010,
+    def_diff = def_2021 - def_2010,
+    ghs_diff = ghs_2020_mean - ghs_2010_mean,
+    ln_diff = ln_2021 - ln_2014,
+    malaria_diff = (malaria_2019 - malaria_2010) / poblacion,
+    across(vivax:lepto, ~.x / poblacion)
+  ) 
+```
+
+
+```{r}
+readr::write_csv(dataset, "data/processed/dataset.csv",  na = "")
+```
+
+
+
+
