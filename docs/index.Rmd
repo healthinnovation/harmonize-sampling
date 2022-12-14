@@ -1,0 +1,126 @@
+---
+title: "Harmonize sampling"
+output: 
+  flexdashboard::flex_dashboard:
+    logo: https://raw.githubusercontent.com/healthinnovation/innovar/gh-pages/apple-touch-icon-120x120.png
+    favicon: https://raw.githubusercontent.com/healthinnovation/innovar/gh-pages/favicon.ico
+    orientation: columns
+    vertical_layout: fill
+    navbar:
+        - { icon: "fa-github", href: "https://github.com/healthinnovation", align: right}
+    self_contained: false
+    lib_dir: "lib"
+---
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+body{
+    font-family: 'Roboto Slab', serif;
+}
+
+.navbar{
+    padding-left: 28px;
+}
+
+.navbar-logo {
+    margin-top: 3px;
+    width: 45px;
+    position: fixed;
+    left: 0px;
+    margin-bottom: 3px;
+}
+
+.navbar-inverse {
+    background-color: #070807;
+    border-color: #070807;
+}
+.navbar-inverse .navbar-brand {
+    color: #ffffff;
+}
+.navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:hover, .navbar-inverse .navbar-nav>.active>a:focus {
+    color: #ffffff;
+    background-color: #ffffff2e;
+}
+.navbar-inverse .navbar-nav>li>a {
+    color: #ffffff;
+}
+.navbar-inverse .navbar-brand:hover, .navbar-inverse .navbar-brand:focus {
+    color: #ffffff;
+    background-color: #ffffff00;
+}
+</style>
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(leaflet)
+library(leaflet.extras)
+library(htmltools)
+library(tidyverse)
+library(crosstalk)
+data_10 <- read_csv("dataset-sample_10.csv")
+data_20 <- read_csv("dataset-sample_20.csv")
+```
+
+Columns {data-width=500}
+-----------------------------------------------------------------------
+
+### Dataset sample 10 <i class="fa fa-map" aria-hidden="true"></i>
+
+```{r}
+
+paleta <- colorFactor(palette = "viridis",domain = data_10$hc_group_4)
+data_10 %>% 
+  leaflet() %>% 
+  addTiles(group = "OpenStreetMap") %>% 
+  addProviderTiles(provider = providers$CartoDB,group = "CartoDB") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery,group = "Satelital") %>% 
+  addCircleMarkers(
+    popup = data_10$village,
+    color = ~paleta(hc_group_4),
+    opacity = 1,
+    fillOpacity = 0.5
+    )%>% 
+  addLayersControl(
+    baseGroups = c("CartoDB","OpenStreetMap","Satelital")
+    ) %>% 
+  addLegend(
+    title = "Legend",
+    pal = paleta,
+    values = ~hc_group_4,
+    opacity = 1,
+    position = "bottomright"
+    )
+
+```
+
+
+Columns {data-width=500}
+-----------------------------------------------------------------------
+
+### Dataset sample 20 <i class="fa fa-map" aria-hidden="true"></i>
+
+```{r}
+paleta <- colorFactor(palette = "viridis",domain = data_20$hc_group_4)
+data_20 %>% 
+  leaflet() %>% 
+  addTiles(group = "OpenStreetMap") %>% 
+  addProviderTiles(provider = providers$CartoDB,group = "CartoDB") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery,group = "Satelital") %>% 
+  addCircleMarkers(
+    popup = data_20$village,
+    color = ~paleta(hc_group_4),
+    opacity = 1,
+    fillOpacity = 0.5
+    )%>% 
+  addLayersControl(
+    baseGroups = c("CartoDB","OpenStreetMap","Satelital")
+    ) %>% 
+  addLegend(
+    title = "Legend",
+    pal = paleta,
+    values = ~hc_group_4,
+    opacity = 1,
+    position = "bottomright"
+    )
+
+```
