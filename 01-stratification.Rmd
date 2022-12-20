@@ -443,12 +443,12 @@ dataset_pca %>%
 
 ```{r}
 set.seed(2022)
-
 sampling_20 <- dataset_pca %>% 
   group_by(hc_group_2) %>% 
   slice_sample(prop = 20/56) %>% 
   ungroup()
 
+set.seed(2022)
 sampling_10 <- dataset_pca %>% 
   group_by(hc_group_2) %>% 
   slice_sample(prop = 10/56) %>% 
@@ -471,7 +471,8 @@ ggplot(full_dataset) +
 ```
 
 ```{r}
-# write_csv(samples, "data/village-clust-samples.csv")
+readr::write_csv(sampling_10, "data/processed/dataset-sample_10.csv")
+readr::write_csv(sampling_20, "data/processed/dataset-sample_20.csv")
 ```
 
 
