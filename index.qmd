@@ -3,13 +3,14 @@ title: "Harmonize sampling️ 🎲✨ "
 author: <i class="bi bi-person-circle"></i> Innovalab - 2022 <img src='https://raw.githubusercontent.com/healthinnovation/innovar/master/man/figures/logo.png' width='40px'/>
 format: 
  html:
+   code-fold: true
+   code-summary: "Show code"
    toc: true
 editor: visual
 theme:
   light: flatly
   dark: darkly
 ---
-
 
 ```{r}
 #| echo: false
@@ -40,12 +41,28 @@ showtext_auto()
 }
 ```
 
-### 🔵 Reading dataset 
+### 🔵 Introduction
+
+This document contains the methodology carried out for the selection of communities for the SIDISI 209821- Harmonize project: Harmonisation of spatio-temporal multi-scale data for health in climate change hotspots in the Peruvian Amazon, in collaboration with the Barcelona Supercomputing Center. The Harmonize project has the following objectives:
+
+1) Geolocation of cases collected by passive surveillance from the Peruvian Ministry of Health through the Center for Disease Control and Prevention (CDC-Peru) in the study area using GPS devices.
+
+2) Identify potential mosquito breeding sites based on new longitudinal ground survey data and using drone technology.
+
+3) Collect data from weather stations, satellite imagery, ambient acoustic sounds and air pollution to calibrate and reduce the spatial resolution of Earth observation data sets.
+
+4) Determine the impact of the use of these new technologies on DIRESA Loreto's infectious disease reduction interventions. 
+
+
+
+
+
+### 🔵 Reading dataset
+
 ```{r}
 dataset <- readr::read_csv("data/processed/dataset.csv", col_types = "ccd")
-glimpse(dataset)
+head(dataset,5)
 ```
-
 
 ### 🔵 Exploratory data analysis
 
@@ -59,7 +76,6 @@ variables %>%
   facet_wrap(~variable, ncol = 2, scales = "free")
 ```
 
-
 ```{r}
 variables_norm <- mutate(variables, across(everything(), scales::rescale))
 variables_std <- mutate(variables, across(everything(), ~as.numeric(scale(.x))))
@@ -67,7 +83,9 @@ variables_std <- mutate(variables, across(everything(), ~as.numeric(scale(.x))))
 
 ### 🔵 Stratification
 
-####  Hierarchical clustering
+Selection of the method with the highest agglomerative coefficient: Different configurations for the agglomerative algorithm (hierarchical clustering) were tested, consisting of a combination of two variable scaling techniques (standardisation or normalisation), three types of distances (Euclidean, Pearson correlation or Spearman correlation) and five types of linking methods (average, single, full, Ward's and weighted). The combination that produced the best agglomerative coefficient was chosen.
+
+#### Hierarchical clustering
 
 ```{r}
 dist_euclidean_norm <- get_dist(variables_norm, method = "euclidean")
@@ -81,44 +99,48 @@ dist_spearman_std <- get_dist(variables_std, method = "spearman")
 ### 🔵 Heatmaps
 
 ::: panel-tabset
-
 #### euclidean
+
 ```{r}
 #| echo: false
 pheatmap(dist_euclidean_norm)
 ```
 
 #### pearson
+
 ```{r}
 #| echo: false
 pheatmap(dist_euclidean_std)
 ```
 
 #### spearman
+
 ```{r}
 #| echo: false
 pheatmap(dist_pearson_norm)
 ```
 
 #### euclidean
+
 ```{r}
 #| echo: false
 pheatmap(dist_pearson_std)
 ```
 
 #### pearson
+
 ```{r}
 #| echo: false
 pheatmap(dist_spearman_norm)
 ```
 
 #### spearman
+
 ```{r}
 #| echo: false
 pheatmap(dist_spearman_std)
 ```
-
-::: 
+:::
 
 ### 🔵 Selection of distance and linkage method
 
@@ -162,8 +184,8 @@ agglomerative_coeff
 ```
 
 ::: panel-tabset
-
 #### Standardized data
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -174,6 +196,7 @@ fviz_dend(
 ```
 
 #### Normalized data
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -182,10 +205,11 @@ fviz_dend(
   agglomerative_coeff$tree[[2]], main = "Normalized data - Pearson correlation - Ward linkage"
 )
 ```
-
 :::
 
 ### 🔵 Selection of number of clusters
+
+Selection of the number of clusters: The criteria of average silhouette width, total within sum of square and gap statistic were used to select the number of clusters. Dimension reduction (PCA) was also used to visualise the data in 2 dimensions for different numbers of clusters and to evaluate how well the groups were formed. Furthermore, for different numbers of clusters, the differences between the means of the variables in different clusters were explored for cluster interpretability. Finally, the individual silhouette of each observation was evaluated for different numbers of clusters to assess whether the observations were well grouped. The final selection was made by evaluating all these criteria and selecting the most suitable number of clusters for the application.
 
 ::: panel-tabset
 ```{r}
@@ -194,6 +218,7 @@ set.seed(2022)
 ```
 
 #### A
+
 ```{r}
 #| echo: false
 fviz_nbclust(
@@ -201,7 +226,6 @@ fviz_nbclust(
   c_metric = "spearman", method = "silhouette"
 )
 ```
-
 
 #### B
 
@@ -214,6 +238,7 @@ fviz_nbclust(
 ```
 
 #### C
+
 ```{r}
 #| echo: false
 fviz_nbclust(
@@ -223,6 +248,7 @@ fviz_nbclust(
 ```
 
 #### D
+
 ```{r}
 #| echo: false
 fviz_nbclust(
@@ -232,6 +258,7 @@ fviz_nbclust(
 ```
 
 #### E
+
 ```{r}
 #| echo: false
 fviz_nbclust(
@@ -241,6 +268,7 @@ fviz_nbclust(
 ```
 
 #### F
+
 ```{r}
 #| echo: false
 fviz_nbclust(
@@ -250,9 +278,7 @@ fviz_nbclust(
 ```
 :::
 
-
 #### 2 clusters
-
 
 ```{r}
 clustering_2 <- hcut(
@@ -263,6 +289,7 @@ clustering_2 <- hcut(
 
 ::: panel-tabset
 #### A
+
 ```{r}
 #| echo: false
 fviz_cluster(clustering_2, ggtheme = theme_classic()) +
@@ -271,12 +298,14 @@ fviz_cluster(clustering_2, ggtheme = theme_classic()) +
 ```
 
 #### B
+
 ```{r}
 #| echo: false
 fviz_silhouette(clustering_2, ggtheme = theme_classic())
 ```
 
 #### C
+
 ```{r}
 #| echo: false
 variables_norm %>% 
@@ -290,9 +319,7 @@ variables_norm %>%
   scale_x_discrete(expand = c(0.05, 0.05)) +
   theme_classic()
 ```
-
 :::
-
 
 #### 3 clusters
 
@@ -303,10 +330,9 @@ clustering_3 <- hcut(
 )
 ```
 
-
 ::: panel-tabset
-
 #### A
+
 ```{r}
 #| echo: false
 fviz_cluster(clustering_3, ggtheme = theme_classic()) +
@@ -315,12 +341,14 @@ fviz_cluster(clustering_3, ggtheme = theme_classic()) +
 ```
 
 #### B
+
 ```{r}
 #| echo: false
 fviz_silhouette(clustering_3, ggtheme = theme_classic())
 ```
 
 #### C
+
 ```{r}
 #| echo: false
 variables_norm %>% 
@@ -334,7 +362,6 @@ variables_norm %>%
   scale_x_discrete(expand = c(0.05, 0.05)) +
   theme_classic()
 ```
-
 :::
 
 #### 4 clusters
@@ -347,8 +374,8 @@ clustering_4 <- hcut(
 ```
 
 ::: panel-tabset
-
 #### A
+
 ```{r}
 #| echo: false
 fviz_cluster(clustering_4, ggtheme = theme_classic()) +
@@ -357,12 +384,14 @@ fviz_cluster(clustering_4, ggtheme = theme_classic()) +
 ```
 
 #### B
+
 ```{r}
 #| echo: false
 fviz_silhouette(clustering_4, ggtheme = theme_classic())
 ```
 
 #### C
+
 ```{r}
 #| echo: false
 variables_norm %>% 
@@ -376,7 +405,6 @@ variables_norm %>%
   geom_line() +
   theme_classic()
 ```
-
 :::
 
 ### 🔵 Maps
@@ -391,8 +419,8 @@ dataset_clustering <- dataset %>%
 ```
 
 ::: panel-tabset
-
 #### A
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -415,7 +443,7 @@ dataset_clustering %>%
     baseGroups = c("CartoDB","OpenStreetMap","Satelital")
     ) %>% 
   addLegend(
-    title = "Legend",
+    title = "Cluster",
     pal = paleta,
     values = ~hc_group_2,
     opacity = 1,
@@ -424,6 +452,7 @@ dataset_clustering %>%
 ```
 
 #### B
+
 ```{r}
 #| echo: false
 
@@ -445,7 +474,7 @@ dataset_clustering %>%
     baseGroups = c("CartoDB","OpenStreetMap","Satelital")
     ) %>% 
   addLegend(
-    title = "Legend",
+    title = "Cluster",
     pal = paleta,
     values = ~hc_group_3,
     opacity = 1,
@@ -454,6 +483,7 @@ dataset_clustering %>%
 ```
 
 #### C
+
 ```{r}
 #| echo: false
 paleta <- colorFactor(palette = "viridis",domain = dataset_clustering$hc_group_4)
@@ -474,25 +504,24 @@ dataset_clustering %>%
     baseGroups = c("CartoDB","OpenStreetMap","Satelital")
     ) %>% 
   addLegend(
-    title = "Legend",
+    title = "Cluster",
     pal = paleta,
     values = ~hc_group_4,
     opacity = 1,
     position = "bottomright"
     )
 ```
-
 :::
 
-
 ### 🔵 Principal components analysis
+
+The communities were also tested for clustering using the principal component that best explained the variability of the variables used (first component). The scores of this component were divided into different categories given by the quantiles. Three forms of clustering were tested: 2 groups with the 50% quantile, 3 groups with the 33% and 66% quantiles, and 4 groups with the 25%, 50% and 75% quantiles.
 
 ```{r}
 pca <- PCA(variables_std, graph = FALSE)
 ```
 
 ::: panel-tabset
-
 #### Scree plot
 
 ```{r}
@@ -508,9 +537,7 @@ fviz_contrib(pca, choice = "var", axes = 1, top = 10)
 ```{r}
 fviz_contrib(pca, choice = "var", axes = 2, top = 10)
 ```
-
 :::
-
 
 ### 🔵 Coordinate plane
 
@@ -548,12 +575,11 @@ dataset_pca <- dataset_clustering %>%
   mutate(across(pca_group_2:pca_group_4, forcats::fct_rev))
 ```
 
-
 ### 🔵 Maps
 
 ::: panel-tabset
-
 #### A
+
 ```{r}
 paleta <- colorFactor(palette = "viridis",domain = dataset_pca$pca_group_2)
 dataset_pca %>% 
@@ -573,7 +599,7 @@ dataset_pca %>%
     baseGroups = c("CartoDB","OpenStreetMap","Satelital")
     ) %>% 
   addLegend(
-    title = "Legend",
+    title = "Cluster",
     pal = paleta,
     values = ~pca_group_2,
     opacity = 1,
@@ -582,6 +608,7 @@ dataset_pca %>%
 ```
 
 #### B
+
 ```{r}
 paleta <- colorFactor(palette = "viridis",domain = dataset_pca$pca_group_3)
 dataset_pca %>% 
@@ -601,7 +628,7 @@ dataset_pca %>%
     baseGroups = c("CartoDB","OpenStreetMap","Satelital")
     ) %>% 
   addLegend(
-    title = "Legend",
+    title = "Cluster",
     pal = paleta,
     values = ~pca_group_3,
     opacity = 1,
@@ -610,6 +637,7 @@ dataset_pca %>%
 ```
 
 #### C
+
 ```{r}
 paleta <- colorFactor(palette = "viridis",domain = dataset_pca$pca_group_4)
 dataset_pca %>% 
@@ -629,17 +657,18 @@ dataset_pca %>%
     baseGroups = c("CartoDB","OpenStreetMap","Satelital")
     ) %>% 
   addLegend(
-    title = "Legend",
+    title = "Cluster",
     pal = paleta,
     values = ~pca_group_4,
     opacity = 1,
     position = "bottomright"
     )
 ```
-::::
-
+:::
 
 ### 🔵Comparison
+
+Comparison between clustering and PCA: We assessed how well the clustering matched using agglomerative clustering and PCA for 2, 3 and 4 groups. Confusion matrices and the Kappa statistic were used to assess clustering agreement.
 
 #### 2 groups
 
@@ -665,7 +694,6 @@ dataset_pca %>%
   kap(hc_group_3, pca_group_3)
 ```
 
-
 #### 4 groups
 
 ```{r}
@@ -676,4 +704,38 @@ dataset_pca %>%
 ```{r}
 dataset_pca %>% 
   kap(hc_group_4, pca_group_4)
+```
+
+# Sampling
+
+Selection of the sample of communities: Having chosen the number of clusters, random sampling proceeded within each cluster proportional to the cluster size.
+
+```{r}
+#| eval: false
+set.seed(2022)
+sampling_20 <- dataset_pca %>% 
+  group_by(hc_group_2) %>% 
+  slice_sample(prop = 20/56) %>% 
+  ungroup()
+set.seed(2022)
+sampling_10 <- dataset_pca %>% 
+  group_by(hc_group_2) %>% 
+  slice_sample(prop = 10/56) %>% 
+  ungroup()
+```
+
+```{r}
+#| eval: false
+full_dataset <- dataset_pca %>% 
+  st_as_sf(coords = c("lon", "lat"))
+sample_dataset <- sampling %>% 
+  st_as_sf(coords = c("lon", "lat"))
+```
+
+```{r}
+#| eval: false
+ggplot(full_dataset) +
+  geom_sf(alpha = 0.1) +
+  geom_sf(aes(color = hc_group_4), data = sample_dataset) +
+  theme_classic()
 ```
