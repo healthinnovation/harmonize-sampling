@@ -459,7 +459,7 @@ sampling_10 <- dataset_pca %>%
 full_dataset <- dataset_pca %>% 
   st_as_sf(coords = c("lon", "lat"))
 
-sample_dataset <- sampling %>% 
+sample_dataset <- sampling_10 %>% 
   st_as_sf(coords = c("lon", "lat"))
 ```
 

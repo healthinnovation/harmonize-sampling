@@ -45,17 +45,13 @@ showtext_auto()
 
 This document contains the methodology carried out for the selection of communities for the SIDISI 209821- Harmonize project: Harmonisation of spatio-temporal multi-scale data for health in climate change hotspots in the Peruvian Amazon, in collaboration with the Barcelona Supercomputing Center. The Harmonize project has the following objectives:
 
-1) Geolocation of cases collected by passive surveillance from the Peruvian Ministry of Health through the Center for Disease Control and Prevention (CDC-Peru) in the study area using GPS devices.
+1)  Geolocation of cases collected by passive surveillance from the Peruvian Ministry of Health through the Center for Disease Control and Prevention (CDC-Peru) in the study area using GPS devices.
 
-2) Identify potential mosquito breeding sites based on new longitudinal ground survey data and using drone technology.
+2)  Identify potential mosquito breeding sites based on new longitudinal ground survey data and using drone technology.
 
-3) Collect data from weather stations, satellite imagery, ambient acoustic sounds and air pollution to calibrate and reduce the spatial resolution of Earth observation data sets.
+3)  Collect data from weather stations, satellite imagery, ambient acoustic sounds and air pollution to calibrate and reduce the spatial resolution of Earth observation data sets.
 
-4) Determine the impact of the use of these new technologies on DIRESA Loreto's infectious disease reduction interventions. 
-
-
-
-
+4)  Determine the impact of the use of these new technologies on DIRESA Loreto's infectious disease reduction interventions.
 
 ### 🔵 Reading dataset
 
@@ -711,7 +707,6 @@ dataset_pca %>%
 Selection of the sample of communities: Having chosen the number of clusters, random sampling proceeded within each cluster proportional to the cluster size.
 
 ```{r}
-#| eval: false
 set.seed(2022)
 sampling_20 <- dataset_pca %>% 
   group_by(hc_group_2) %>% 
@@ -725,17 +720,24 @@ sampling_10 <- dataset_pca %>%
 ```
 
 ```{r}
-#| eval: false
 full_dataset <- dataset_pca %>% 
   st_as_sf(coords = c("lon", "lat"))
-sample_dataset <- sampling %>% 
+sample_10_dataset <- sampling_10 %>% 
+  st_as_sf(coords = c("lon", "lat"))
+sample_20_dataset <- sampling_20 %>% 
   st_as_sf(coords = c("lon", "lat"))
 ```
 
 ```{r}
-#| eval: false
 ggplot(full_dataset) +
   geom_sf(alpha = 0.1) +
-  geom_sf(aes(color = hc_group_4), data = sample_dataset) +
+  geom_sf(aes(color = hc_group_4), data = sample_10_dataset) +
+  theme_classic()
+```
+
+```{r}
+ggplot(full_dataset) +
+  geom_sf(alpha = 0.1) +
+  geom_sf(aes(color = hc_group_4), data = sample_20_dataset) +
   theme_classic()
 ```
