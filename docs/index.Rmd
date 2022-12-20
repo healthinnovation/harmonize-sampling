@@ -84,7 +84,7 @@ data_10 %>%
     baseGroups = c("CartoDB","OpenStreetMap","Satelital")
     ) %>% 
   addLegend(
-    title = "Legend",
+    title = "Clusters",
     pal = paleta,
     values = ~hc_group_4,
     opacity = 1,
@@ -116,7 +116,7 @@ data_20 %>%
     baseGroups = c("CartoDB","OpenStreetMap","Satelital")
     ) %>% 
   addLegend(
-    title = "Legend",
+    title = "Clusters",
     pal = paleta,
     values = ~hc_group_4,
     opacity = 1,
