@@ -729,15 +729,72 @@ sample_20_dataset <- sampling_20 %>%
 ```
 
 ```{r}
-ggplot(full_dataset) +
-  geom_sf(alpha = 0.1) +
-  geom_sf(aes(color = hc_group_4), data = sample_10_dataset) +
-  theme_classic()
+#| echo: false
+#| warning: false
+#| message: false
+paleta <- colorFactor(palette = "viridis",domain = sample_10_dataset$hc_group_4)
+
+sample_10_dataset %>% 
+  leaflet() %>% 
+  addTiles(group = "OpenStreetMap") %>% 
+  addProviderTiles(provider = providers$CartoDB,group = "CartoDB") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery,group = "Satelital") %>%
+  addCircleMarkers(
+    data = full_dataset,
+    opacity = 1,
+    radius = 0.1,
+    fillOpacity = 0.5
+    ) %>% 
+  addCircleMarkers(
+    popup = sample_20_dataset$village,
+    color = ~paleta(hc_group_4),
+    opacity = 1,
+    radius = 0.1,
+    fillOpacity = 0.5
+    )%>% 
+  addLayersControl(
+    baseGroups = c("CartoDB","OpenStreetMap","Satelital")
+    ) %>% 
+  addLegend(
+    title = "Cluster",
+    pal = paleta,
+    values = ~hc_group_4,
+    opacity = 1,
+    position = "bottomright"
+    )
 ```
 
 ```{r}
-ggplot(full_dataset) +
-  geom_sf(alpha = 0.1) +
-  geom_sf(aes(color = hc_group_4), data = sample_20_dataset) +
-  theme_classic()
+#| echo: false
+#| warning: false
+#| message: false
+paleta <- colorFactor(palette = "viridis",domain = sample_20_dataset$hc_group_4)
+sample_20_dataset %>% 
+  leaflet() %>% 
+  addTiles(group = "OpenStreetMap") %>% 
+  addProviderTiles(provider = providers$CartoDB,group = "CartoDB") %>%
+  addProviderTiles(provider = providers$Esri.WorldImagery,group = "Satelital") %>% 
+  addCircleMarkers(
+    data = full_dataset,
+    opacity = 1,
+    radius = 0.1,
+    fillOpacity = 0.5
+    ) %>% 
+  addCircleMarkers(
+    popup = sample_20_dataset$village,
+    color = ~paleta(hc_group_4),
+    opacity = 1,
+    radius = 0.1,
+    fillOpacity = 0.5
+    )%>% 
+  addLayersControl(
+    baseGroups = c("CartoDB","OpenStreetMap","Satelital")
+    ) %>% 
+  addLegend(
+    title = "Cluster",
+    pal = paleta,
+    values = ~hc_group_4,
+    opacity = 1,
+    position = "bottomright"
+    )
 ```

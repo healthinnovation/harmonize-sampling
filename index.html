@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.2.122">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -151,13 +151,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="quarto-title-meta">
 
     <div>
-    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Authors</div>
     <div class="quarto-title-meta-contents">
              <p><i class="bi bi-person-circle"></i> Innovalab - 2022 <img src="https://raw.githubusercontent.com/healthinnovation/innovar/master/man/figures/logo.png" width="40px"> </p>
           </div>
   </div>
     
-  
     
   </div>
   
@@ -949,27 +948,15 @@ PCA  1  2  3  4
 </details>
 </div>
 <div class="cell">
-<details>
-<summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(full_dataset) <span class="sc">+</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">alpha =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">color =</span> hc_group_4), <span class="at">data =</span> sample_10_dataset) <span class="sc">+</span></span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-61-1.png" class="img-fluid" width="672"></p>
+<div id="htmlwidget-44474b3e8cd160f85a98" style="width:100%;height:464px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-44474b3e8cd160f85a98">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,"OpenStreetMap",{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addProviderTiles","args":["CartoDB",null,"CartoDB",{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addProviderTiles","args":["Esri.WorldImagery",null,"Satelital",{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircleMarkers","args":[[-3.86314736199995,-3.83172496599997,-3.85680925799994,-3.84475953999993,-3.88769027499995,-3.90626750799993,-3.91543622799998,-3.89895903999997,-3.94411530399998,-3.95913039899995,-3.95416547499997,-3.93826106399996,-3.94905988899995,-3.93173572399996,-3.96621617499994,-3.97822655199997,-4.01440999999994,-4.00329833399996,-4.04229999999995,-4.00330999999994,-4.02110999999996,-4.07166333299995,-4.06482666699998,-4.09461147399998,-4.10303534099995,-4.10399728699997,-4.12752262399994,-4.12383685299994,-4.23084622599993,-4.15414853999994,-4.21929839499995,-4.20319062899995,-4.22314443199997,-4.24647244699997,-3.82858322599998,-4.05017999999995,-4.08207333299993,-4.12628744999995,-4.16213717299996,-4.15308977299998,-4.22239955099997,-4.26020921799994,-4.33036166699998,-4.12184414699993,-4.14976954899993,-4.17905447399994,-3.83015154499998,-3.82299904799993,-3.84478611999998,-3.87406242499998,-4.48026333299993,-4.35699666699998,-3.93563968499996,-3.88145797299995,-3.85317052499994,-4.05684502699995],[-73.3367761919999,-73.3780190639999,-73.338717016,-73.385880969,-73.351416802,-73.413630584,-73.340365866,-73.3225132979999,-73.3290719949999,-73.345052094,-73.406419908,-73.3746413119999,-73.362467884,-73.391568174,-73.3615718899999,-73.384126308,-73.4339883329999,-73.39309,-73.4376583329999,-73.4699683329999,-73.423671667,-73.4456283329999,-73.47498,-73.453247679,-73.402807615,-73.454581885,-73.41596056,-73.4482461169999,-73.487435416,-73.474309579,-73.483968037,-73.479276166,-73.4667335029999,-73.548449218,-73.3549727779999,-73.4264466659999,-73.395123333,-73.497835315,-73.490329634,-73.462007746,-73.4516216599999,-73.545999695,-73.531539412,-73.483562489,-73.458473092,-73.4378794149999,-73.335522957,-73.326178534,-73.3394000649999,-73.3476990139999,-73.54581,-73.55276,-73.3201597779999,-73.318977116,-73.373492684,-73.455098076],0.1,null,null,{"interactive":true,"className":"","stroke":true,"color":"#03F","weight":5,"opacity":1,"fill":true,"fillColor":"#03F","fillOpacity":0.5},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[-3.84475953999993,-3.83015154499998,-3.93173572399996,-3.95416547499997,-4.02110999999996,-4.06482666699998,-4.21929839499995,-4.17905447399994,-4.14976954899993],[-73.385880969,-73.335522957,-73.391568174,-73.406419908,-73.423671667,-73.47498,-73.483968037,-73.4378794149999,-73.458473092],0.1,null,null,{"interactive":true,"className":"","stroke":true,"color":["#31688E","#440154","#31688E","#31688E","#35B779","#35B779","#FDE725","#FDE725","#FDE725"],"weight":5,"opacity":1,"fill":true,"fillColor":["#31688E","#440154","#31688E","#31688E","#35B779","#35B779","#FDE725","#FDE725","#FDE725"],"fillOpacity":0.5},null,null,["NINA RUMI","SHUSHUNA","SAN JOSE","EL DORADO","VILLA CRUZ","NUEVA ESPERANZA","SAN JUAN DE MUNICH","SANTA BARBARA","12 DE ABRIL","HUASCAR","EX PETROLERO I ZONA","ANGEL CARDENAS","LOS CEDROS","NUEVO MIRAFLORES","10 DE OCTUBRE II ZONA","NUEVO HORIZONTE","13 DE FEBRERO","CREACION 2000","23 DE FEBRERO"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLayersControl","args":[["CartoDB","OpenStreetMap","Satelital"],[],{"collapsed":true,"autoZIndex":true,"position":"topright"}]},{"method":"addLegend","args":[{"colors":["#440154","#31688E","#35B779","#FDE725"],"labels":["1","2","3","4"],"na_color":null,"na_label":"NA","opacity":1,"position":"bottomright","type":"factor","title":"Cluster","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[-4.48026333299993,-3.82299904799993],"lng":[-73.55276,-73.318977116]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="cell">
-<details>
-<summary>Show code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(full_dataset) <span class="sc">+</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">alpha =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">color =</span> hc_group_4), <span class="at">data =</span> sample_20_dataset) <span class="sc">+</span></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-62-1.png" class="img-fluid" width="672"></p>
+<div id="htmlwidget-2514ce28ae593bde0f73" style="width:100%;height:464px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2514ce28ae593bde0f73">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,"OpenStreetMap",{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addProviderTiles","args":["CartoDB",null,"CartoDB",{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addProviderTiles","args":["Esri.WorldImagery",null,"Satelital",{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircleMarkers","args":[[-3.86314736199995,-3.83172496599997,-3.85680925799994,-3.84475953999993,-3.88769027499995,-3.90626750799993,-3.91543622799998,-3.89895903999997,-3.94411530399998,-3.95913039899995,-3.95416547499997,-3.93826106399996,-3.94905988899995,-3.93173572399996,-3.96621617499994,-3.97822655199997,-4.01440999999994,-4.00329833399996,-4.04229999999995,-4.00330999999994,-4.02110999999996,-4.07166333299995,-4.06482666699998,-4.09461147399998,-4.10303534099995,-4.10399728699997,-4.12752262399994,-4.12383685299994,-4.23084622599993,-4.15414853999994,-4.21929839499995,-4.20319062899995,-4.22314443199997,-4.24647244699997,-3.82858322599998,-4.05017999999995,-4.08207333299993,-4.12628744999995,-4.16213717299996,-4.15308977299998,-4.22239955099997,-4.26020921799994,-4.33036166699998,-4.12184414699993,-4.14976954899993,-4.17905447399994,-3.83015154499998,-3.82299904799993,-3.84478611999998,-3.87406242499998,-4.48026333299993,-4.35699666699998,-3.93563968499996,-3.88145797299995,-3.85317052499994,-4.05684502699995],[-73.3367761919999,-73.3780190639999,-73.338717016,-73.385880969,-73.351416802,-73.413630584,-73.340365866,-73.3225132979999,-73.3290719949999,-73.345052094,-73.406419908,-73.3746413119999,-73.362467884,-73.391568174,-73.3615718899999,-73.384126308,-73.4339883329999,-73.39309,-73.4376583329999,-73.4699683329999,-73.423671667,-73.4456283329999,-73.47498,-73.453247679,-73.402807615,-73.454581885,-73.41596056,-73.4482461169999,-73.487435416,-73.474309579,-73.483968037,-73.479276166,-73.4667335029999,-73.548449218,-73.3549727779999,-73.4264466659999,-73.395123333,-73.497835315,-73.490329634,-73.462007746,-73.4516216599999,-73.545999695,-73.531539412,-73.483562489,-73.458473092,-73.4378794149999,-73.335522957,-73.326178534,-73.3394000649999,-73.3476990139999,-73.54581,-73.55276,-73.3201597779999,-73.318977116,-73.373492684,-73.455098076],0.1,null,null,{"interactive":true,"className":"","stroke":true,"color":"#03F","weight":5,"opacity":1,"fill":true,"fillColor":"#03F","fillOpacity":0.5},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[-3.84475953999993,-3.83015154499998,-3.93173572399996,-3.95416547499997,-3.85317052499994,-3.90626750799993,-3.93563968499996,-3.94411530399998,-4.21929839499995,-4.26020921799994,-4.09461147399998,-4.05017999999995,-4.22239955099997,-4.22314443199997,-4.15308977299998,-4.07166333299995,-4.01440999999994,-4.08207333299993,-4.14976954899993],[-73.385880969,-73.335522957,-73.391568174,-73.406419908,-73.373492684,-73.413630584,-73.3201597779999,-73.3290719949999,-73.483968037,-73.545999695,-73.453247679,-73.4264466659999,-73.4516216599999,-73.4667335029999,-73.462007746,-73.4456283329999,-73.4339883329999,-73.395123333,-73.458473092],0.1,null,null,{"interactive":true,"className":"","stroke":true,"color":["#31688E","#440154","#31688E","#31688E","#440154","#31688E","#31688E","#31688E","#FDE725","#FDE725","#35B779","#35B779","#FDE725","#FDE725","#FDE725","#35B779","#35B779","#35B779","#FDE725"],"weight":5,"opacity":1,"fill":true,"fillColor":["#31688E","#440154","#31688E","#31688E","#440154","#31688E","#31688E","#31688E","#FDE725","#FDE725","#35B779","#35B779","#FDE725","#FDE725","#FDE725","#35B779","#35B779","#35B779","#FDE725"],"fillOpacity":0.5},null,null,["NINA RUMI","SHUSHUNA","SAN JOSE","EL DORADO","VILLA CRUZ","NUEVA ESPERANZA","SAN JUAN DE MUNICH","SANTA BARBARA","12 DE ABRIL","HUASCAR","EX PETROLERO I ZONA","ANGEL CARDENAS","LOS CEDROS","NUEVO MIRAFLORES","10 DE OCTUBRE II ZONA","NUEVO HORIZONTE","13 DE FEBRERO","CREACION 2000","23 DE FEBRERO"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLayersControl","args":[["CartoDB","OpenStreetMap","Satelital"],[],{"collapsed":true,"autoZIndex":true,"position":"topright"}]},{"method":"addLegend","args":[{"colors":["#440154","#31688E","#35B779","#FDE725"],"labels":["1","2","3","4"],"na_color":null,"na_label":"NA","opacity":1,"position":"bottomright","type":"factor","title":"Cluster","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[-4.48026333299993,-3.82299904799993],"lng":[-73.55276,-73.318977116]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -1132,24 +1119,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     button.classList.add('code-copy-button-checked');
     var currentTitle = button.getAttribute("title");
     button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
     setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
       button.setAttribute("title", currentTitle);
       button.classList.remove('code-copy-button-checked');
     }, 1000);
@@ -1185,42 +1155,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
   var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
   for (var i=0; i<bibliorefs.length; i++) {
     const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
       });
-    }
+      return popup.innerHTML;
+    });
   }
 });
 </script>
