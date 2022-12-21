@@ -57,13 +57,18 @@ This document contains the methodology carried out for the selection of communit
 
 ```{r}
 dataset <- readr::read_csv("data/processed/dataset.csv", col_types = "ccd")
-head(dataset,5)
+dataset %>% 
+  DT::datatable()
 ```
 
-### 🔵 Exploratory data analysis
+```{r}
+#| echo: false
+variables <- select(dataset, malaria:malaria_diff)
+```
 
 ```{r}
-variables <- select(dataset, malaria:malaria_diff)
+#| echo: false
+#| eval: false
 variables %>% 
   tidyr::pivot_longer(cols = everything(), names_to = "variable") %>% 
   ggplot(aes(value, variable)) +
@@ -73,6 +78,7 @@ variables %>%
 ```
 
 ```{r}
+#| echo: false
 variables_norm <- mutate(variables, across(everything(), scales::rescale))
 variables_std <- mutate(variables, across(everything(), ~as.numeric(scale(.x))))
 ```
@@ -94,43 +100,49 @@ dist_spearman_std <- get_dist(variables_std, method = "spearman")
 
 ### 🔵 Heatmaps
 
+#### Normalization 
+
 ::: panel-tabset
-#### euclidean
+##### Euclidean distance
 
 ```{r}
 #| echo: false
 pheatmap(dist_euclidean_norm)
 ```
 
-#### pearson
-
-```{r}
-#| echo: false
-pheatmap(dist_euclidean_std)
-```
-
-#### spearman
+##### Pearson correlation
 
 ```{r}
 #| echo: false
 pheatmap(dist_pearson_norm)
 ```
 
-#### euclidean
+##### Spearman correlation
+
+```{r}
+#| echo: false
+pheatmap(dist_spearman_norm)
+```
+:::
+
+#### Standardization 
+
+::: panel-tabset
+##### Euclidean distance
+
+```{r}
+#| echo: false
+pheatmap(dist_euclidean_std)
+```
+
+##### Pearson correlation
 
 ```{r}
 #| echo: false
 pheatmap(dist_pearson_std)
 ```
 
-#### pearson
-
-```{r}
-#| echo: false
-pheatmap(dist_spearman_norm)
-```
-
-#### spearman
+##### Spearman correlation
 
 ```{r}
 #| echo: false
@@ -141,6 +153,7 @@ pheatmap(dist_spearman_std)
 ### 🔵 Selection of distance and linkage method
 
 ```{r}
+#| echo: false
 scale_data <- function(data, method = "standardization") {
   if (method == "standardization") {
     data_scaled <- mutate(data, across(everything(), ~as.numeric(scale(.x))))
@@ -153,16 +166,19 @@ scale_data <- function(data, method = "standardization") {
 ```
 
 ```{r}
+#| echo: false
 scaling_method <- c("standardization", "normalization")
 dist_method <- c("euclidean", "pearson", "spearman")
 linkage_method <- c("average", "single", "complete", "ward", "weighted")
 ```
 
 ```{r}
+#| echo: false
 design <- tidyr::expand_grid(scaling_method, dist_method, linkage_method, variables)
 ```
 
 ```{r}
+#| echo: false
 agglomerative_coeff <- design %>% 
   tidyr::nest(data = -c(scaling_method, dist_method, linkage_method)) %>% 
   mutate(
@@ -176,11 +192,15 @@ agglomerative_coeff <- design %>%
 ```
 
 ```{r}
-agglomerative_coeff
+agglomerative_coeff %>% 
+  select(-c(data, scaling, dist_mat, tree)) %>% 
+  DT::datatable()
 ```
 
+#### Dendograms
+
 ::: panel-tabset
-#### Standardized data
+#### Standardization, Spearman correlation, Ward linkage
 
 ```{r}
 #| echo: false
@@ -191,7 +211,7 @@ fviz_dend(
 )
 ```
 
-#### Normalized data
+#### Normalization, Pearson correlation, Ward linkage
 
 ```{r}
 #| echo: false
@@ -205,25 +225,26 @@ fviz_dend(
 
 ### 🔵 Selection of number of clusters
 
-Selection of the number of clusters: The criteria of average silhouette width, total within sum of square and gap statistic were used to select the number of clusters. Dimension reduction (PCA) was also used to visualise the data in 2 dimensions for different numbers of clusters and to evaluate how well the groups were formed. Furthermore, for different numbers of clusters, the differences between the means of the variables in different clusters were explored for cluster interpretability. Finally, the individual silhouette of each observation was evaluated for different numbers of clusters to assess whether the observations were well grouped. The final selection was made by evaluating all these criteria and selecting the most suitable number of clusters for the application.
+Selection of the number of clusters: The criteria of average silhouette width, total within sum of squares and gap statistic were used to select the number of clusters. Dimension reduction (PCA) was also used to visualize the data in 2 dimensions for different numbers of clusters and to evaluate how well the groups were formed. Furthermore, for different numbers of clusters, the differences between the means of the variables in different clusters were explored for cluster interpretability. Finally, the individual silhouette of each observation was evaluated for different numbers of clusters to assess whether the observations were well grouped. The final selection was made by evaluating all these criteria and selecting the most suitable number of clusters for the application.
+
+#### Evaluation of criteria
+
+##### Standardization, Spearman correlation, Ward linkage
 
 ::: panel-tabset
+
+###### Average silhouette width
+
 ```{r}
 #| echo: false
 set.seed(2022)
-```
-
-#### A
-
-```{r}
-#| echo: false
 fviz_nbclust(
   variables_std, hcut, hc_func = "agnes", hc_method = "ward.D2", 
   c_metric = "spearman", method = "silhouette"
 )
 ```
 
-#### B
+###### Total within sum of squares
 
 ```{r}
 #| echo: false
@@ -233,27 +254,35 @@ fviz_nbclust(
 )
 ```
 
-#### C
+###### Gap statistic
 
 ```{r}
 #| echo: false
+set.seed(2022)
 fviz_nbclust(
   variables_std, hcut, hc_func = "agnes", hc_method = "ward.D2", 
   hc_metric = "spearman", method = "gap_stat"
 )
 ```
 
-#### D
+:::
+
+##### Normalization, Pearson correlation, Ward linkage
+
+::: panel-tabset
+
+######  Average silhouette width
 
 ```{r}
 #| echo: false
+set.seed(2022)
 fviz_nbclust(
   variables_norm, hcut, hc_func = "agnes", hc_method = "ward.D2", 
   c_metric = "pearson", method = "silhouette"
 )
 ```
 
-#### E
+###### Total within sum of squares
 
 ```{r}
 #| echo: false
@@ -263,10 +292,11 @@ fviz_nbclust(
 )
 ```
 
-#### F
+###### Gap statistic
 
 ```{r}
 #| echo: false
+set.seed(2022)
 fviz_nbclust(
   variables_norm, hcut, hc_func = "agnes", hc_method = "ward.D2", 
   hc_metric = "pearson", method = "gap_stat"
@@ -274,7 +304,9 @@ fviz_nbclust(
 ```
 :::
 
-#### 2 clusters
+#### Evaluation of cluster sizes
+
+##### 2 clusters
 
 ```{r}
 clustering_2 <- hcut(
@@ -284,7 +316,7 @@ clustering_2 <- hcut(
 ```
 
 ::: panel-tabset
-#### A
+###### Clusters on plane
 
 ```{r}
 #| echo: false
@@ -293,14 +325,14 @@ fviz_cluster(clustering_2, ggtheme = theme_classic()) +
   geom_hline(yintercept = 0, linetype = "dashed")
 ```
 
-#### B
+###### Individual silhouette
 
 ```{r}
 #| echo: false
 fviz_silhouette(clustering_2, ggtheme = theme_classic())
 ```
 
-#### C
+###### Mean difference between clusters
 
 ```{r}
 #| echo: false
@@ -315,9 +347,10 @@ variables_norm %>%
   scale_x_discrete(expand = c(0.05, 0.05)) +
   theme_classic()
 ```
+
 :::
 
-#### 3 clusters
+##### 3 clusters
 
 ```{r}
 clustering_3 <- hcut(
@@ -327,7 +360,8 @@ clustering_3 <- hcut(
 ```
 
 ::: panel-tabset
-#### A
+
+###### Clusters on plane
 
 ```{r}
 #| echo: false
@@ -336,14 +370,14 @@ fviz_cluster(clustering_3, ggtheme = theme_classic()) +
   geom_hline(yintercept = 0, linetype = "dashed")
 ```
 
-#### B
+###### Individual silhouette
 
 ```{r}
 #| echo: false
 fviz_silhouette(clustering_3, ggtheme = theme_classic())
 ```
 
-#### C
+###### Mean difference between clusters
 
 ```{r}
 #| echo: false
@@ -358,9 +392,10 @@ variables_norm %>%
   scale_x_discrete(expand = c(0.05, 0.05)) +
   theme_classic()
 ```
+
 :::
 
-#### 4 clusters
+##### 4 clusters
 
 ```{r}
 clustering_4 <- hcut(
@@ -370,7 +405,7 @@ clustering_4 <- hcut(
 ```
 
 ::: panel-tabset
-#### A
+###### Clusters on plane
 
 ```{r}
 #| echo: false
@@ -379,14 +414,14 @@ fviz_cluster(clustering_4, ggtheme = theme_classic()) +
   geom_hline(yintercept = 0, linetype = "dashed")
 ```
 
-#### B
+###### Individual silhouette
 
 ```{r}
 #| echo: false
 fviz_silhouette(clustering_4, ggtheme = theme_classic())
 ```
 
-#### C
+###### Mean difference between clusters
 
 ```{r}
 #| echo: false
@@ -415,7 +450,7 @@ dataset_clustering <- dataset %>%
 ```
 
 ::: panel-tabset
-#### A
+#### 2 clusters
 
 ```{r}
 #| echo: false
@@ -447,7 +482,7 @@ dataset_clustering %>%
     )
 ```
 
-#### B
+#### 3 clusters
 
 ```{r}
 #| echo: false
@@ -478,7 +513,7 @@ dataset_clustering %>%
     )
 ```
 
-#### C
+#### 4 clusters
 
 ```{r}
 #| echo: false
@@ -517,7 +552,6 @@ The communities were also tested for clustering using the principal component th
 pca <- PCA(variables_std, graph = FALSE)
 ```
 
-::: panel-tabset
 #### Scree plot
 
 ```{r}
@@ -526,9 +560,15 @@ fviz_screeplot(pca)
 
 #### Contribution plot
 
+::: panel-tabset
+
+##### Dimension 1
+
 ```{r}
 fviz_contrib(pca, choice = "var", axes = 1, top = 10)
 ```
+
+##### Dimension 2
 
 ```{r}
 fviz_contrib(pca, choice = "var", axes = 2, top = 10)
@@ -541,7 +581,7 @@ fviz_contrib(pca, choice = "var", axes = 2, top = 10)
 fviz_pca_ind(pca)
 ```
 
-### 🔵 Scoring
+### 🔵 Maps
 
 ```{r}
 pca_results <- get_pca_ind(pca)
@@ -571,10 +611,8 @@ dataset_pca <- dataset_clustering %>%
   mutate(across(pca_group_2:pca_group_4, forcats::fct_rev))
 ```
 
-### 🔵 Maps
-
 ::: panel-tabset
-#### A
+#### 2 groups
 
 ```{r}
 paleta <- colorFactor(palette = "viridis",domain = dataset_pca$pca_group_2)
@@ -603,7 +641,7 @@ dataset_pca %>%
     )
 ```
 
-#### B
+#### 3 groups
 
 ```{r}
 paleta <- colorFactor(palette = "viridis",domain = dataset_pca$pca_group_3)
@@ -632,7 +670,7 @@ dataset_pca %>%
     )
 ```
 
-#### C
+#### 4 groups
 
 ```{r}
 paleta <- colorFactor(palette = "viridis",domain = dataset_pca$pca_group_4)
@@ -662,7 +700,7 @@ dataset_pca %>%
 ```
 :::
 
-### 🔵Comparison
+### 🔵 Comparison
 
 Comparison between clustering and PCA: We assessed how well the clustering matched using agglomerative clustering and PCA for 2, 3 and 4 groups. Confusion matrices and the Kappa statistic were used to assess clustering agreement.
 
@@ -728,6 +766,10 @@ sample_20_dataset <- sampling_20 %>%
   st_as_sf(coords = c("lon", "lat"))
 ```
 
+::: panel-tabset
+
+## 10 samples
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -764,6 +806,8 @@ sample_10_dataset %>%
     )
 ```
 
+## 20 samples
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -798,3 +842,5 @@ sample_20_dataset %>%
     position = "bottomright"
     )
 ```
+
+:::
